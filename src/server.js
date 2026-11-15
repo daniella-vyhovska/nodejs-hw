@@ -1,40 +1,35 @@
-const express = require('express');
-const cors = require('cors');
-const pinoHttp = require('pino-http');
+import express from 'express';
+import cors from 'cors';
+import pinoHttp from 'pino-http';
 
-const notesRouter = require('./routes/notes');
+import notesRouter from './routes/notes.js';
 
-const setupServer = () => {
-  const app = express();
+const app = express();
 
-  // Middleware
-  app.use(cors());
-  app.use(express.json());
-  app.use(pinoHttp());
+app.use(cors());
+app.use(express.json());
+app.use(pinoHttp());
 
-  // Маршрути
-  app.use('/notes', notesRouter);
+app.use('/notes', notesRouter);
 
-  // Тестовий маршрут для перевірки 500
-  app.get('/test-error', () => {
-    throw new Error('Simulated server error');
+app.get('/test-error', () => {
+  throw new Error('Simulated server error');
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+    message: 'Route not found',
   });
+});
 
-  // 404 middleware
-  app.use((req, res) => {
-    res.status(404).json({
-      message: 'Route not found',
-    });
+app.use((err, req, res, next) => {
+  res.status(500).json({
+    message: err.message,
   });
+});
 
-  // 500 middleware
-  app.use((err, req, res, next) => {
-    res.status(500).json({
-      message: err.message,
-    });
-  });
+const PORT = process.env.PORT || 3000;
 
-  return app;
-};
-
-module.exports = setupServer;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
