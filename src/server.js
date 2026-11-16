@@ -3,15 +3,25 @@ import express from 'express';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
 
-import notesRouter from './routes/notes.js';
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(pinoHttp());
 
-app.use('/notes', notesRouter);
+app.get('/notes', (req, res) => {
+  res.status(200).json({
+    message: 'Retrieved all notes',
+  });
+});
+
+app.get('/notes/:noteId', (req, res) => {
+  const { noteId } = req.params;
+
+  res.status(200).json({
+    message: `Retrieved note with ID: ${noteId}`,
+  });
+});
 
 app.get('/test-error', () => {
   throw new Error('Simulated server error');
